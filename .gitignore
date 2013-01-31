@@ -1,0 +1,5 @@
+session/
+.ropeproject/
+*.pyc
+src
+dst
