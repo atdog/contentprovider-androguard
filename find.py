@@ -44,11 +44,11 @@ def get_variable_list(method):
     else :
         return [ "v{:d}".format(i) for i in range(0, nb) ], []
 
-def find_instruction_by_re(block, index, operation, regular_expression):
+def find_instruction_by_re(block, index, name_re, output_re):
     found_ins = None
     instructions = None
     re_match = None
-    re_pattern = re.compile(regular_expression)
+    re_pattern = re.compile(output_re)
     # find URL init
     while found_ins is None:
         instructions = block.get_instructions()
@@ -56,7 +56,7 @@ def find_instruction_by_re(block, index, operation, regular_expression):
             ins = instructions[index]
             ins_output = ins.get_output()
             ins_name = ins.get_name()
-            if ins_name == operation:
+            if re.match(name_re, ins_name):
                 re_match = re_pattern.match(ins_output)
                 # match regular_expression
                 if re_match:
@@ -132,6 +132,7 @@ if __name__ == "__main__" :
             if trace_var in local_list:
                 print WARN_MSG_PREFIX + "In local variables list: [ " + ' '.join([ ("\033[0;34m" + i + "\033[m" if i == trace_var else i ) for i in local_list]) + " ]"
                 # trace back if in local_list
+                #query_block, query_index, _ = find_instruction_by_re(query_block, query_index, "move-result-object|iget-object", "^"+trace_var) 
                 instructions = query_block.get_instructions()
                 for index in xrange(query_index -1, -1, -1):
                     ins = instructions[index]
