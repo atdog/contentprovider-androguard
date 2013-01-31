@@ -45,6 +45,19 @@ def get_variable_list(method):
         return [ "v{:d}".format(i) for i in range(0, nb) ], []
 
 def find_instruction_by_re(block, index, name_re, output_re):
+    """
+        Return the matched instruction block, index and re match object
+
+        :param block: start match the instruction from this block
+
+        :param index: start match the instruction from this index of this block
+
+        :param name_re: regular expression to match string ins.get_name()
+
+        :param output_re: regular expression to match string ins.get_output()
+
+        :rtype: Tuple - block, index, match_obj
+    """
     found_ins = None
     instructions = None
     re_match = None
@@ -148,5 +161,6 @@ if __name__ == "__main__" :
 
             # seperated line
             print WARN_MSG_PREFIX + "..."
+        # not match any malicious pattern
         else:
-           print ERROR_MSG_PREFIX + "Pattern not found."
+           print ERROR_MSG_PREFIX + "Pattern not found"
