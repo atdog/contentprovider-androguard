@@ -132,21 +132,21 @@ if __name__ == "__main__" :
             if trace_var in local_list:
                 print WARN_MSG_PREFIX + "In local variables list: [ " + ' '.join([ ("\033[0;34m" + i + "\033[m" if i == trace_var else i ) for i in local_list]) + " ]"
                 # trace back if in local_list
-                #query_block, query_index, _ = find_instruction_by_re(query_block, query_index, "move-result-object|iget-object", "^"+trace_var) 
-                instructions = query_block.get_instructions()
-                for index in xrange(query_index -1, -1, -1):
-                    ins = instructions[index]
-                    ins_output = ins.get_output()
-                    ins_name = ins.get_name()
-                    if ins_name == "move-result-object" and trace_var == ins_output:
-                        break
-                    elif ins_name == "iget-object" and re.match("^"+ trace_var +",.*", ins_output):
-                        break
-                print OK_MSG_PREFIX + "Found " + str(index-1) + ": " + instructions[index-1].get_name() + " " + instructions[index-1].get_output()
-                print OK_MSG_PREFIX + "Found " + str(index) + ": "  + ins_name + " " + ins_output
-    
+                query_block, query_index, re_match = find_instruction_by_re(query_block, query_index, "move-result-object|iget-object", "^"+trace_var) 
+                # trace back found
+                if re_match:
+                    instructions = query_block.get_instructions()
+                    print OK_MSG_PREFIX + "Found " + str(query_index-1) + ": " + instructions[query_index-1].get_name() + " " + instructions[query_index-1].get_output()
+                    print OK_MSG_PREFIX + "Found " + str(query_index) + ": "  + instructions[query_index].get_name() + " " + instructions[query_index].get_output()
+
+                else:
+                    print ERROR_MSG_PREFIX + 'Not found local variable init statement'
+                    continue
+            # jmp function if var in param_list
             elif trace_var in param_list:
                 print WARN_MSG_PREFIX + "In parameters list: [ " + ' '.join([ ("\033[0;34m" + i + "\033[m" if i == trace_var else i ) for i in param_list]) + " ]"
+
+            # seperated line
             print WARN_MSG_PREFIX + "..."
         else:
            print ERROR_MSG_PREFIX + "Pattern not found."
