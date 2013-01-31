@@ -44,7 +44,7 @@ def get_variable_list(method):
     else :
         return [ "v{:d}".format(i) for i in range(0, nb) ], []
 
-def find_instruction_by_re(block, index, regular_expression):
+def find_instruction_by_re(block, index, operation, regular_expression):
     found_ins = None
     instructions = None
     re_match = None
@@ -55,20 +55,20 @@ def find_instruction_by_re(block, index, regular_expression):
         for index in xrange(index - 1, -1, -1):        
             ins = instructions[index]
             ins_output = ins.get_output()
-            re_match = re_pattern.match(ins_output)
-            # match regular_expression
-            if re_match:
-                index = index
-                found_ins = ins
-                break
+            ins_name = ins.get_name()
+            if ins_name == operation:
+                re_match = re_pattern.match(ins_output)
+                # match regular_expression
+                if re_match:
+                    index = index
+                    found_ins = ins
+                    break
 
         if found_ins is None:
             block = block.get_prev()[0][2]
             index = len(block.get_instructions())
 
     return block, index, re_match
-
-# add the function for recursive backtracing
 
 
 if __name__ == "__main__" :
@@ -117,7 +117,7 @@ if __name__ == "__main__" :
             print OK_MSG_PREFIX + 'Match "Ljava/net/URL;->openConnection()"'
             var_url = match_url_openconnection.group(1)
             # find the instruction matching URL->openConnection 
-            query_block, query_index, match_url_init = find_instruction_by_re(query_block, query_index, var_url+", ([^ ,]*), Ljava/net/URL;-><init>\(Ljava/lang/String;\)V")
+            query_block, query_index, match_url_init = find_instruction_by_re(query_block, query_index, "invoke-direct", var_url+", ([^ ,]*), Ljava/net/URL;-><init>\(Ljava/lang/String;\)V")
             # find URL.<init>
             trace_var = None
             if match_url_init:
