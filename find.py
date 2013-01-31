@@ -7,6 +7,9 @@ from androguard.core.analysis import analysis
 # default value is 1000
 sys.setrecursionlimit(100000)
 apk_session_dir = "session/" 
+ERROR_MSG_PREFIX = "\033[1;31m[!]\033[m "
+OK_MSG_PREFIX = "\033[1;32m[+]\033[m "
+WARN_MSG_PREFIX = "\033[1;33m[*]\033[m "
 
 def read_apk(apk_name):
     """ Read apk file and return a, d, dx """
@@ -41,10 +44,6 @@ def get_variable_list(method):
     else :
         return [ "v{:d}".format(i) for i in range(0, nb) ], []
 
-ERROR_PREFIX = "\033[1;31m[!]\033[m "
-OK_PREFIX = "\033[1;32m[+]\033[m "
-WARN_PREFIX = "\033[1;33m[*]\033[m "
-
 def find_instruction_by_re(block, index, regular_expression):
     found_ins = None
     instructions = None
@@ -62,13 +61,18 @@ def find_instruction_by_re(block, index, regular_expression):
                 index = index
                 found_ins = ins
                 break
+
         if found_ins is None:
             block = block.get_prev()[0][2]
             index = len(block.get_instructions())
+
     return block, index, re_match
 
+# add the function for recursive backtracing
+
+
 if __name__ == "__main__" :
-    print OK_PREFIX + "Start to get malicious actions..."
+    print OK_MSG_PREFIX + "Start to get malicious actions..."
     apk_name = "/Users/atdog/Desktop/com.texty.sms-1.apk"
 
     a, d, dx = read_apk(apk_name)
@@ -98,7 +102,7 @@ if __name__ == "__main__" :
                 if idx == path.get_idx():
                     query_index = index
                     query_block = block
-                    print OK_PREFIX + "Get the instruction."
+                    print OK_MSG_PREFIX + "Get the instruction."
                 idx += ins.get_length()
     
         # trace back in block
@@ -110,35 +114,38 @@ if __name__ == "__main__" :
         ins_output = instructions[query_index].get_output()
         match_url_openconnection = re_url_openconnection.match(ins_output)
         if match_url_openconnection:
-            print OK_PREFIX + 'Match "Ljava/net/URL;->openConnection()"'
+            print OK_MSG_PREFIX + 'Match "Ljava/net/URL;->openConnection()"'
             var_url = match_url_openconnection.group(1)
-            # initialize local variables
+            # find the instruction matching URL->openConnection 
             query_block, query_index, match_url_init = find_instruction_by_re(query_block, query_index, var_url+", ([^ ,]*), Ljava/net/URL;-><init>\(Ljava/lang/String;\)V")
-            # found URL.<init>
+            # find URL.<init>
             trace_var = None
             if match_url_init:
                 trace_var = match_url_init.group(1)
+                print OK_MSG_PREFIX + 'Match "new java.net.URL(\033[1;34m' + trace_var + '\033[0m)"'
+            else:
+                print ERROR_MSG_PREFIX + 'Not found URL init statement'
+                # continue to next path if not match the url_init re
+                continue
             # find move-result-object or iget-object
             local_list, param_list = get_variable_list(method)
             if trace_var in local_list:
-                print WARN_PREFIX + "local variables list: [ " + ' '.join([ ("\033[0;34m" + i + "\033[m" if i == trace_var else i ) for i in local_list]) + " ]"
-
+                print WARN_MSG_PREFIX + "In local variables list: [ " + ' '.join([ ("\033[0;34m" + i + "\033[m" if i == trace_var else i ) for i in local_list]) + " ]"
+                # trace back if in local_list
+                instructions = query_block.get_instructions()
+                for index in xrange(query_index -1, -1, -1):
+                    ins = instructions[index]
+                    ins_output = ins.get_output()
+                    ins_name = ins.get_name()
+                    if ins_name == "move-result-object" and trace_var == ins_output:
+                        break
+                    elif ins_name == "iget-object" and re.match("^"+ trace_var +",.*", ins_output):
+                        break
+                print OK_MSG_PREFIX + "Found " + str(index-1) + ": " + instructions[index-1].get_name() + " " + instructions[index-1].get_output()
+                print OK_MSG_PREFIX + "Found " + str(index) + ": "  + ins_name + " " + ins_output
+    
             elif trace_var in param_list:
-                print WARN_PREFIX + "parameters list: [ " + ' '.join([ ("\033[0;34m" + i + "\033[m" if i == trace_var else i ) for i in param_list]) + " ]"
-            # trace back
-            instructions = query_block.get_instructions()
-            for index in xrange(query_index -1, -1, -1):
-                ins = instructions[index]
-                ins_output = ins.get_output()
-                ins_name = ins.get_name()
-                if ins_name == "move-result-object" and trace_var == ins_output:
-                    break
-                elif ins_name == "iget-object" and re.match("^"+ trace_var +",.*", ins_output):
-                    break
-            # temporary print information
-            if trace_var in local_list:
-                print OK_PREFIX + "Found " + str(index-1) + ": " + instructions[index-1].get_name() + " " + instructions[index-1].get_output()
-                print OK_PREFIX + "Found " + str(index) + ": "  + ins_name + " " + ins_output
-            print WARN_PREFIX + "..."
+                print WARN_MSG_PREFIX + "In parameters list: [ " + ' '.join([ ("\033[0;34m" + i + "\033[m" if i == trace_var else i ) for i in param_list]) + " ]"
+            print WARN_MSG_PREFIX + "..."
         else:
-           print ERROR_PREFIX + "Pattern not found."
+           print ERROR_MSG_PREFIX + "Pattern not found."
