@@ -78,7 +78,11 @@ def find_instruction_by_re(block, index, name_re, output_re):
                     break
 
         if found_ins is None:
-            block = block.get_prev()[0][2]
+            block_list = block.get_prev()
+            if len(block_list) > 1:
+                # future work
+                print WARN_MSG_PREFIX + "More than one block in previous block list"
+            block = block_list[0][2]
             index = len(block.get_instructions())
 
     return block, index, re_match
@@ -100,6 +104,7 @@ if __name__ == "__main__" :
         src_class_name, src_method_name, src_descriptor = src_method.get_class_name(), src_method.get_name(), src_method.get_descriptor()
         # Get analyzed method
         method = d.get_method_descriptor(src_class_name, src_method_name, src_descriptor)
+        # androguard.core.bytecodes.dvm.EncodedMethod
         analyized_method = dx.get_method(method)
         #BasicBlocks.get(self):
         #   :rtype: return each basic block (:class:`DVMBasicBlock` object)
@@ -115,7 +120,7 @@ if __name__ == "__main__" :
                 if idx == path.get_idx():
                     query_index = index
                     query_block = block
-                    print OK_MSG_PREFIX + "Get the instruction"
+                    print OK_MSG_PREFIX + "Get the critical instruction"
                 idx += ins.get_length()
     
         # trace back in block
@@ -130,7 +135,7 @@ if __name__ == "__main__" :
             print OK_MSG_PREFIX + 'Match "Ljava/net/URL;->openConnection()"'
             var_url = match_url_openconnection.group(1)
             # find the instruction matching URL->openConnection 
-            query_block, query_index, match_url_init = find_instruction_by_re(query_block, query_index, "invoke-direct", var_url+", ([^ ,]*), Ljava/net/URL;-><init>\(Ljava/lang/String;\)V")
+            query_block, query_index, match_url_init = find_instruction_by_re(query_block, query_index, "invoke-direct", "{}, ([^ ,]*), Ljava/net/URL;-><init>\(Ljava/lang/String;\)V".format(var_url))
             # find URL.<init>
             trace_var = None
             if match_url_init:
@@ -159,8 +164,8 @@ if __name__ == "__main__" :
             elif trace_var in param_list:
                 print WARN_MSG_PREFIX + "In parameters list: [ {} ]".format(' '.join([ ("\033[0;34m{}\033[m".format(i) if i == trace_var else i ) for i in param_list]))
 
-            # seperated line
-            print WARN_MSG_PREFIX + "..."
         # not match any malicious pattern
         else:
-           print ERROR_MSG_PREFIX + "Pattern not found"
+            print ERROR_MSG_PREFIX + "Pattern not found"
+        # seperated line
+        print WARN_MSG_PREFIX + "..."
