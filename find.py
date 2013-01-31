@@ -57,7 +57,7 @@ def find_instruction_by_re(block, index, regular_expression):
             ins = instructions[index]
             ins_output = ins.get_output()
             re_match = re_pattern.match(ins_output)
-            # found regular_expression
+            # match regular_expression
             if re_match:
                 index = index
                 found_ins = ins
