@@ -102,7 +102,7 @@ if __name__ == "__main__" :
                 if idx == path.get_idx():
                     query_index = index
                     query_block = block
-                    print OK_MSG_PREFIX + "Get the instruction."
+                    print OK_MSG_PREFIX + "Get the instruction"
                 idx += ins.get_length()
     
         # trace back in block
@@ -122,7 +122,7 @@ if __name__ == "__main__" :
             trace_var = None
             if match_url_init:
                 trace_var = match_url_init.group(1)
-                print OK_MSG_PREFIX + 'Match "new java.net.URL(\033[1;34m' + trace_var + '\033[0m)"'
+                print OK_MSG_PREFIX + 'Match "new java.net.URL(\033[1;34m{var}\033[0m)"'.format(var=trace_var)
             else:
                 print ERROR_MSG_PREFIX + 'Not found URL init statement'
                 # continue to next path if not match the url_init re
@@ -130,21 +130,21 @@ if __name__ == "__main__" :
             # find move-result-object or iget-object
             local_list, param_list = get_variable_list(method)
             if trace_var in local_list:
-                print WARN_MSG_PREFIX + "In local variables list: [ " + ' '.join([ ("\033[0;34m" + i + "\033[m" if i == trace_var else i ) for i in local_list]) + " ]"
+                print WARN_MSG_PREFIX + "In local variables list: [ {} ]".format(' '.join([ ("\033[0;34m{}\033[m".format(i) if i == trace_var else i ) for i in local_list]))
                 # trace back if in local_list
                 query_block, query_index, re_match = find_instruction_by_re(query_block, query_index, "move-result-object|iget-object", "^"+trace_var) 
                 # trace back found
                 if re_match:
                     instructions = query_block.get_instructions()
-                    print OK_MSG_PREFIX + "Found " + str(query_index-1) + ": " + instructions[query_index-1].get_name() + " " + instructions[query_index-1].get_output()
-                    print OK_MSG_PREFIX + "Found " + str(query_index) + ": "  + instructions[query_index].get_name() + " " + instructions[query_index].get_output()
+                    print OK_MSG_PREFIX + "Found {idx!s}: {name} {output}".format(idx=query_index-1, name=instructions[query_index-1].get_name(), output=instructions[query_index-1].get_output())
+                    print OK_MSG_PREFIX + "Found {idx!s}: {name} {output}".format(idx=query_index, name=instructions[query_index].get_name(), output=instructions[query_index].get_output())
 
                 else:
                     print ERROR_MSG_PREFIX + 'Not found local variable init statement'
                     continue
             # jmp function if var in param_list
             elif trace_var in param_list:
-                print WARN_MSG_PREFIX + "In parameters list: [ " + ' '.join([ ("\033[0;34m" + i + "\033[m" if i == trace_var else i ) for i in param_list]) + " ]"
+                print WARN_MSG_PREFIX + "In parameters list: [ {} ]".format(' '.join([ ("\033[0;34m{}\033[m".format(i) if i == trace_var else i ) for i in param_list]))
 
             # seperated line
             print WARN_MSG_PREFIX + "..."
