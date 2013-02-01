@@ -3,5 +3,5 @@ session/
 *.pyc
 src
 dst
-contentprovider-androguard/
+dm4-fork/
 dm4.py

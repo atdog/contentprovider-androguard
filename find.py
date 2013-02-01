@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys, os, re, androlyze
+import __builtin__
 from androlyze import AnalyzeAPK
 from androguard.core.analysis import analysis
 import dm4
@@ -16,16 +17,17 @@ if __name__ == "__main__" :
     print OK_MSG_PREFIX + "Start to get malicious actions..."
     apk_name = "/Users/atdog/Desktop/com.texty.sms-1.apk"
 
-    a, d, dx = dm4.read_apk(apk_name)
+    __builtin__.a, __builtin__.d, __builtin__.dx = dm4.read_apk(apk_name)
     # a: androguard.core.bytecodes.apk.APK
     # d: androguard.core.bytecodes.dvm.DalvikVMFormat
     # dx: androguard.core.analysis.analysis.uVMAnalysis
-    
-    cm = d.get_class_manager()
-    
+
+    __builtin__.cm = d.get_class_manager()
+
     for path in dx.get_permissions(["INTERNET"])["INTERNET"]:
         src_method = cm.get_method_ref(path.get_src_idx())
         src_class_name, src_method_name, src_descriptor = src_method.get_class_name(), src_method.get_name(), src_method.get_descriptor()
+        print WARN_MSG_PREFIX + src_class_name, src_method_name, src_descriptor
         # Get analyzed method
         method = d.get_method_descriptor(src_class_name, src_method_name, src_descriptor)
         # androguard.core.bytecodes.dvm.EncodedMethod
@@ -53,13 +55,8 @@ if __name__ == "__main__" :
         #   URL->URLConnection
         instructions = query_block.get_instructions()
         ins_output = instructions[query_index].get_output()
-        if re.match(".*, Ljava/net/URL;->openConnection\(\)Ljava/net/URLConnection", ins_output):
-            print OK_MSG_PREFIX + 'Match "Ljava/net/URL;->openConnection()"'
-            var_url = trace_var_list[0]
-            result = dm4.backtrace_variable(analyized_method, path.get_idx(), var_url)
-            dm4.print_backtrace_result(result)
-        # not match any malicious pattern
-        else:
-            print ERROR_MSG_PREFIX + "Pattern not found"
+        var_url = trace_var_list[-1]
+        result = dm4.backtrace_variable(analyized_method, path.get_idx(), var_url)
+        dm4.print_backtrace_result(result)
         # seperated line
         print WARN_MSG_PREFIX + "\033[1;30m------------------------------------------------------\033[0m"
