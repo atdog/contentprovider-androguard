@@ -18,7 +18,7 @@ def read_apk(apk_name):
 
     # mkdir session
     if not os.path.isdir(apk_session_dir):
-        os.system("mkdir", apk_session_dir)
+        os.system("mkdir '{}'".format(apk_session_dir))
 
     # check if session saved
     if not os.path.isfile(apk_session_name):
