@@ -15,19 +15,20 @@ WARN_MSG_PREFIX = "\033[1;33m[*]\033[m "
 
 if __name__ == "__main__" :
     print OK_MSG_PREFIX + "Start to get malicious actions..."
-    apk_name = "/Users/atdog/Desktop/com.texty.sms-1.apk"
+    #apk_name = "/Users/atdog/Desktop/com.texty.sms-1.apk"
+    apk_name = "/Users/atdog/Desktop/com.samsung.swift.app.kiesair-1.apk"
 
-    __builtin__.a, __builtin__.d, __builtin__.dx = dm4.read_apk(apk_name)
+    a, d, dx = dm4.read_apk(apk_name)
     # a: androguard.core.bytecodes.apk.APK
     # d: androguard.core.bytecodes.dvm.DalvikVMFormat
     # dx: androguard.core.analysis.analysis.uVMAnalysis
 
-    __builtin__.cm = d.get_class_manager()
+    cm = d.get_class_manager()
+    dm4.a, dm4.d, dm4.dx, dm4.cm = a, d, dx, cm
 
     for path in dx.get_permissions(["INTERNET"])["INTERNET"]:
         src_method = cm.get_method_ref(path.get_src_idx())
         src_class_name, src_method_name, src_descriptor = src_method.get_class_name(), src_method.get_name(), src_method.get_descriptor()
-        print WARN_MSG_PREFIX + src_class_name, src_method_name, src_descriptor
         # Get analyzed method
         method = d.get_method_descriptor(src_class_name, src_method_name, src_descriptor)
         # androguard.core.bytecodes.dvm.EncodedMethod
