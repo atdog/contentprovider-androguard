@@ -15,8 +15,8 @@ WARN_MSG_PREFIX = "\033[1;33m[*]\033[m "
 
 if __name__ == "__main__" :
     print OK_MSG_PREFIX + "Start to get malicious actions..."
-    #apk_name = "/Users/atdog/Desktop/com.texty.sms-1.apk"
-    apk_name = "/Users/atdog/Desktop/com.samsung.swift.app.kiesair-1.apk"
+    apk_name = "/Users/atdog/Desktop/com.texty.sms-1.apk"
+#     apk_name = "/Users/atdog/Desktop/eva_3/jp.naver.line.android.apk"
 
     a, d, dx = dm4.read_apk(apk_name)
     # a: androguard.core.bytecodes.apk.APK
