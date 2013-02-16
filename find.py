@@ -27,6 +27,18 @@ if __name__ == "__main__" :
     cm = d.get_class_manager()
     dm4.a, dm4.d, dm4.dx, dm4.cm = a, d, dx, cm
 
+    class_hierarchy = dm4.construct_class_hierarchy()
+    dm4.class_hierarchy = class_hierarchy
+
+    intent_service_link = None
+    dm4.intent_service_link = None
+
+    intent_service_link = dm4.link()
+    dm4.intent_service_link = intent_service_link
+
+    print "link:", intent_service_link
+    print "hierarchy:", class_hierarchy
+
     i = 0
 #    for path in dx.get_permissions(["INTERNET"])["INTERNET"]:
     path =  dx.get_permissions(["INTERNET"])["INTERNET"][14]
