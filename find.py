@@ -39,11 +39,11 @@ if __name__ == "__main__" :
     print "link:", intent_service_link
     print "hierarchy:", class_hierarchy
 
-    i = 0
-#    for path in dx.get_permissions(["INTERNET"])["INTERNET"]:
-    path =  dx.get_permissions(["INTERNET"])["INTERNET"][14]
-    for i in range(14, 15):
-        print "Path " + str(i)
+    permission_paths = dx.get_permissions(["INTERNET"])["INTERNET"]
+    for i in range(0, len(permission_paths)):
+#     for i in range(14, 15):
+        path = permission_paths[i]
+        print "Path ", i
         src_method = cm.get_method_ref(path.get_src_idx())
         src_class_name, src_method_name, src_descriptor = src_method.get_class_name(), src_method.get_name(), src_method.get_descriptor()
         print "Class:  " + src_class_name
@@ -68,7 +68,8 @@ if __name__ == "__main__" :
                     query_index = index
                     query_block = block
                     trace_var_list = dm4.get_instruction_variable(ins)
-                    print "Ins:    " + ins.get_name() + " / " + ins.get_output()
+
+                    print "Ins:    0x{0:04x}".format(idx)," " + ins.get_name() + " / " + ins.get_output()
                     print OK_MSG_PREFIX + "Get the critical instruction"
                 idx += ins.get_length()
         # trace back in block
@@ -78,8 +79,7 @@ if __name__ == "__main__" :
         ins_output = instructions[query_index].get_output()
         var_url = trace_var_list[-1]
         result = dm4.backtrace_variable(analyized_method, path.get_idx(), var_url)
-        dm4.print_backtrace_result(result, 0)
-        dm4.print_backtrace_result(result)
+#         dm4.print_backtrace_result(result, 0)
+#         dm4.print_backtrace_result(result)
         # seperated line
         print WARN_MSG_PREFIX + "\033[1;30m------------------------------------------------------\033[0m"
-        i += 1
