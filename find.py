@@ -14,12 +14,20 @@ OK_MSG_PREFIX = "\033[1;32m[+]\033[m "
 WARN_MSG_PREFIX = "\033[1;33m[*]\033[m "
 
 if __name__ == "__main__" :
+    apk_name = "/Users/atdog/Desktop/eva_3/com.jb.gosms.apk"
+    if len(sys.argv) == 2:
+        apk_name = sys.argv[1]
+
+    # check apk file exist
+    if not os.path.exists(apk_name):
+        print ERROR_MSG_PREFIX + "APK not found: {}".format(apk_name)
+        sys.exit(-1)
+
+    print OK_MSG_PREFIX + "APK: {}".format(apk_name)
     print OK_MSG_PREFIX + "Start to get malicious actions..."
-    apk_name = "apk/com.texty.sms-1.apk"
-#    apk_name = "apk/com.facebook.katana.apk"
-#    apk_name = "apk/com.facebook.orca.apk"
 
     a, d, dx = dm4.read_apk(apk_name)
+#     a, d, dx = AnalyzeAPK(apk_name)
     # a: androguard.core.bytecodes.apk.APK
     # d: androguard.core.bytecodes.dvm.DalvikVMFormat
     # dx: androguard.core.analysis.analysis.uVMAnalysis
@@ -36,18 +44,21 @@ if __name__ == "__main__" :
     intent_service_link = dm4.link()
     dm4.intent_service_link = intent_service_link
 
+    target_methods = dm4.get_target_methods()
+
     print "link:", intent_service_link
     print "hierarchy:", class_hierarchy
 
     permission_paths = dx.get_permissions(["INTERNET"])["INTERNET"]
     for i in range(0, len(permission_paths)):
-#     for i in range(14, 15):
+#     for i in range(39, 40):
         path = permission_paths[i]
         print "Path ", i
         src_method = cm.get_method_ref(path.get_src_idx())
         src_class_name, src_method_name, src_descriptor = src_method.get_class_name(), src_method.get_name(), src_method.get_descriptor()
         print "Class:  " + src_class_name
         print "Method: " + src_method_name
+        print "Descriptor: " + src_descriptor
         # Get analyzed method
         method = d.get_method_descriptor(src_class_name, src_method_name, src_descriptor)
         # androguard.core.bytecodes.dvm.EncodedMethod
@@ -78,8 +89,10 @@ if __name__ == "__main__" :
         instructions = query_block.get_instructions()
         ins_output = instructions[query_index].get_output()
         var_url = trace_var_list[-1]
+        print WARN_MSG_PREFIX + "\033[0;33mBacktrace ivar {}\033[0m".format(var_url)
         result = dm4.backtrace_variable(analyized_method, path.get_idx(), var_url)
 #         dm4.print_backtrace_result(result, 0)
 #         dm4.print_backtrace_result(result)
+        dm4.check_target_in_result(target_methods, result)
         # seperated line
         print WARN_MSG_PREFIX + "\033[1;30m------------------------------------------------------\033[0m"
