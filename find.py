@@ -41,13 +41,21 @@ if __name__ == "__main__" :
     intent_service_link = None
     dm4.intent_service_link = None
 
-    intent_service_link = dm4.link()
+    intent_service_link = dm4.service_link()
+    broadcast_link = dm4.broadcast_link()
     dm4.intent_service_link = intent_service_link
+    dm4.broadcast_link = broadcast_link
+    # combine
+    dm4.intent_service_link = dict(intent_service_link.items() + broadcast_link.items())
 
-    target_methods = dm4.get_target_methods()
+    # unique
+    target_methods = list(set(dm4.get_target_methods()))
 
-    print "link:", intent_service_link
-    print "hierarchy:", class_hierarchy
+
+    print "Service link:", intent_service_link
+    print "Broadcast link:", broadcast_link
+    print "Hierarchy:", class_hierarchy
+    print "Target {!s} methods:".format(len(target_methods)), target_methods
 
     permission_paths = dx.get_permissions(["INTERNET"])["INTERNET"]
     for i in range(0, len(permission_paths)):

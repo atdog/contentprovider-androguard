@@ -34,7 +34,8 @@ if __name__ == "__main__" :
     intent_service_link = None
     dm4.intent_service_link = None
 
-    intent_service_link = dm4.link()
+    intent_service_link = dm4.service_link()
+    dm4.broadcast_link()
     dm4.intent_service_link = intent_service_link
     
     print dm4.get_target_methods()
