@@ -63,7 +63,8 @@ if __name__ == "__main__" :
     if eva_type == "1":
         permission_paths = dm4.dx.tainted_packages.search_methods("^Ljava/lang/.*$", "^valueOf$", "^\(Ljava/lang/String;\).*$")
     elif eva_type == "2":
-        permission_paths = dx.get_permissions(["SEND_SMS"])["SEND_SMS"]
+#         permission_paths = dx.get_permissions(["SEND_SMS"])["SEND_SMS"]
+        permission_paths = dm4.dx.tainted_packages.search_methods("^Landroid/telephony/SmsManager;$", "^sendTextMessage$", "^\(Ljava/lang/String; Ljava/lang/String; Ljava/lang/String; Landroid/app/PendingIntent; Landroid/app/PendingIntent;\)V$")
     elif eva_type == "3":
         permission_paths = dx.get_permissions(["INTERNET"])["INTERNET"]
     for i in range(0, len(permission_paths)):
@@ -104,11 +105,22 @@ if __name__ == "__main__" :
         #   URL->URLConnection
         instructions = query_block.get_instructions()
         ins_output = instructions[query_index].get_output()
-        var_url = trace_var_list[-1]
-        print WARN_MSG_PREFIX + "\033[0;33mBacktrace ivar {}\033[0m".format(var_url)
-        result = dm4.backtrace_variable(analyized_method, path.get_idx(), var_url)
+        if eva_type == "2":
+            var_url = trace_var_list[1]
+            print WARN_MSG_PREFIX + "\033[0;33mBacktrace ivar {}\033[0m".format(var_url)
+            result = dm4.backtrace_variable(analyized_method, path.get_idx(), var_url)
+            dm4.check_target_in_result(target_methods, result)
+
+            var_url = trace_var_list[2]
+            print WARN_MSG_PREFIX + "\033[0;33mBacktrace ivar {}\033[0m".format(var_url)
+            result = dm4.backtrace_variable(analyized_method, path.get_idx(), var_url)
+            dm4.check_target_in_result(target_methods, result)
+        else:
+            var_url = trace_var_list[-1]
+            print WARN_MSG_PREFIX + "\033[0;33mBacktrace ivar {}\033[0m".format(var_url)
+            result = dm4.backtrace_variable(analyized_method, path.get_idx(), var_url)
+            dm4.check_target_in_result(target_methods, result)
 #         dm4.print_backtrace_result(result, 0)
 #         dm4.print_backtrace_result(result)
-        dm4.check_target_in_result(target_methods, result)
         # seperated line
         print WARN_MSG_PREFIX + "\033[1;30m------------------------------------------------------\033[0m"
