@@ -15,8 +15,10 @@ WARN_MSG_PREFIX = "\033[1;33m[*]\033[m "
 
 if __name__ == "__main__" :
     apk_name = "/Users/atdog/Desktop/eva_3/com.jb.gosms.apk"
-    if len(sys.argv) == 2:
+    eva_type = 1
+    if len(sys.argv) == 3:
         apk_name = sys.argv[1]
+        eva_type = sys.argv[2]
 
     # check apk file exist
     if not os.path.exists(apk_name):
@@ -57,7 +59,13 @@ if __name__ == "__main__" :
     print "Hierarchy:", class_hierarchy
     print "Target {!s} methods:".format(len(target_methods)), target_methods
 
-    permission_paths = dx.get_permissions(["INTERNET"])["INTERNET"]
+    permission_paths = []
+    if eva_type == "1":
+        permission_paths = dm4.dx.tainted_packages.search_methods("^Ljava/lang/.*$", "^valueOf$", "^\(Ljava/lang/String;\).*$")
+    elif eva_type == "2":
+        permission_paths = dx.get_permissions(["SEND_SMS"])["SEND_SMS"]
+    elif eva_type == "3":
+        permission_paths = dx.get_permissions(["INTERNET"])["INTERNET"]
     for i in range(0, len(permission_paths)):
 #     for i in range(39, 40):
         path = permission_paths[i]
