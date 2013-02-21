@@ -53,7 +53,6 @@ if __name__ == "__main__" :
     # unique
     target_methods = list(set(dm4.get_target_methods()))
 
-
     print "Service link:", intent_service_link
     print "Broadcast link:", broadcast_link
     print "Hierarchy:", class_hierarchy
@@ -112,6 +111,11 @@ if __name__ == "__main__" :
             dm4.check_target_in_result(target_methods, result)
 
             var_url = trace_var_list[2]
+            print WARN_MSG_PREFIX + "\033[0;33mBacktrace ivar {}\033[0m".format(var_url)
+            result = dm4.backtrace_variable(analyized_method, path.get_idx(), var_url)
+            dm4.check_target_in_result(target_methods, result)
+        elif eva_type == "1":
+            var_url = trace_var_list[-1]
             print WARN_MSG_PREFIX + "\033[0;33mBacktrace ivar {}\033[0m".format(var_url)
             result = dm4.backtrace_variable(analyized_method, path.get_idx(), var_url)
             dm4.check_target_in_result(target_methods, result)
